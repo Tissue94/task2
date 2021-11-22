@@ -16,17 +16,17 @@
         position: absolute;
         top: 0;
         right: 0;
-        }
+    }
 </style>
 
 <div id="tabs">
     <ul>
         <li><a href="#result" data-url='http://localhost:5555/task2/1team.json'>한식</a></li>
-        <li><a href="#result" data-url='http://192.168.0.215:5555/task2/2team.json'>일식</a></li>
+        <li><a href="#result" data-url='http://localhost:5555/task2/2team.json'>일식</a></li>
         <li><a href="#result" data-url='http://localhost:5555/task2/3team.json'>프렌차이즈</a></li>
     </ul>
     <div id="result">
-        <hi>RESULT DIV</hi>
+        <hi>배너를 눌러주세요</hi>
     </div>
 </div>
 
@@ -65,77 +65,37 @@
 <!--main logic-->
 <script>
 
-    function loadData(serverInfo){
+    let storesArr = []
 
-        console.log("loadData: " + serverInfo)
 
-        // fetch(serverInfo)
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         //console.log(data)
-        //         makeList(data)
-        //     })
+    $(document).ready(function (e){
 
-    }
-    const markerArr = []
+        $("select[name='tabs']").on("change", function (e){
+            const url = $("select[name='tabs'] option:selected").val()
 
-    function  makeList(arr){
-        const ulEle = document.querySelector("#result")
-
-        let str = ''
-
-        for (let i = 0; i < arr.length; i++) {
-            console.log(arr[i])
-            str += `<li data-name="${arr[i].name}" data-lat="${arr[i].lat}" data-lng="${arr[i].lng}">${arr[i].name}</lidata->`
-        }// data-name 같이 data를 표현할 수 있다 (data속성)
-        ulEle.innerHTML = str
-
-        for (let i = 0; i < markerArr.length; i++) {
-            markerArr[i].setMap(null)
-        }
-
-        for (let i = 0; i <arr.length; i++) {
-            const store = arr[i]
-            const latLng = new kakao.maps.LatLng(store.lat, store.lng)
-            const marker = new kakao.maps.Marker({
-                map:map,
-                position: latLng,
-                title: store.name
-            })
-            markerArr.push(marker)
-
-        }
-    }
-
-    document.querySelector("#result").addEventListener("click", (e) => {
-        e.stopPropagation()
-        e.preventDefault()
-
-        const target = e.target
-        if(target.tagName !== 'LI'){
-            return
-        }
-
-        const ui = document.getElementsByClassName("#list")
-        const item = list.getElementsByTagName("li")
-
-        for (let i = 0; i < item.length ;i++) {
-            if(item[i] !== target){
-                item[i].remove()
+            if(!url){
+                return
             }
-        }
+            $.getJSON(url, function (arr){
 
-        console.log(target)
+                storesArr = arr
 
-        const name = target.getAttribute("data-name")
-        const lat = target.getAttribute("data-lat")
-        const lng = target.getAttribute("data-lng")
+                let str = '<option value="0">---</option>'
 
-    }, false)
+                for (let i = 0; i < arr.length; i++) {
+                    const {sno,sname} = arr[i]
+
+                    str += `<option value="${sno}">${sname}</option>`
+                    // 이런 작업을 맵핑이라고 한다
+                }
+                $("select[name='stores']").html(str)
+            })
+        })
+    })
+
 
 
 </script>
-
 <script>
     $(document).ready(function (){
         $("#tabs").tabs()
@@ -143,12 +103,21 @@
         $("#tabs a").on("click", function (e){
             e.preventDefault()
             e.stopPropagation()
-            console.log(e.target)
+
             // 밑의 코드 === e.target.getAttribute("data-url)
             const url = $(e.target).data("url")
 
             $.getJSON(url,function (arr){
-                console.log(arr)
+                storesArr = arr
+
+                let str = ''
+
+                for (let i = 0; i < arr.length; i++) {
+                    const {sno,sname} = arr[i]
+
+                    str += `<option value="${sno}">${sname}</option>`
+                }
+                $('#result').html(str)
             })//getjson
         })//click
     })
